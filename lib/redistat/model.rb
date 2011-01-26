@@ -55,7 +55,15 @@ module Redistat
         options[:depth] || nil
       end
     end
-    
+
+    def expire(expiration = nil)
+      options[:expire] = if expiration.is_a?(Hash)
+                           expiration
+                         else
+                           Hash.new(expiration)
+                         end
+    end
+
     def store_event(boolean = nil)
       if !boolean.nil?
         options[:store_event] = boolean

@@ -72,7 +72,7 @@ module Redistat
     
     def save
       return false if !self.new?
-      Summary.update_all(@key, @stats, depth_limit, @connection_ref)
+      Summary.update_all(@key, @stats, depth_limit, expiration, @connection_ref)
       if @options[:store_event]
         @id = self.next_id
         db.hmset("#{self.scope}#{KEY_EVENT}#{@id}",
@@ -91,7 +91,11 @@ module Redistat
     def depth_limit
       @options[:depth] ||= @key.depth
     end
-    
+
+    def expiration
+      @options[:expire] ||= {}
+    end
+
     def self.create(*args)
       self.new(*args).save
     end

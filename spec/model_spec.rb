@@ -101,5 +101,21 @@ describe Redistat::Model do
     stats.total[:count].should == 8
     stats.total[:weight].should == 617
   end
-  
+
+  describe "options" do
+    it "should set 'expire' option with a hash" do
+      ModelHelper1.expire :sec => 10, :min => 10
+      ModelHelper1.options[:expire][:sec].should == 10
+      ModelHelper1.options[:expire][:min].should == 10
+      ModelHelper1.options[:expire][:hour].should be_nil
+    end
+
+    it "should set 'expire' option with an integer" do
+      ModelHelper1.expire 10
+      Redistat::Date::DEPTHS.each do |depth|
+        ModelHelper1.options[:expire][:depth].should == 10
+      end
+    end
+  end
+
 end

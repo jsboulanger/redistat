@@ -45,5 +45,38 @@ describe Redistat::Summary do
       end
     end
   end
-  
+
+  describe "expiration" do
+    it "should not expire keys by default" do
+      Redistat::Summary.update_all(@key, @stats, :sec)
+      [:year, :month, :day, :hour, :min, :sec].each do |depth|
+        db.exists(@key.to_s(depth)).should be_true
+        db.ttl(@key.to_s(depth)).should == -1
+      end
+    end
+
+    it "should set expiration of keys by depth" do
+      Redistat::Summary.update_all(@key, @stats, :sec, { :min => 100, :sec => 100 })
+      [:year, :month, :day, :hour].each do |depth|
+        db.ttl(@key.to_s(depth)).should == -1
+      end
+
+      [:min, :sec].each do |depth|
+        db.ttl(@key.to_s(depth)).should be > 0
+      end
+    end
+
+    it "should expire a dead key" do
+      key = @key.to_s(:year)
+
+      # Precondition
+      Redistat::Summary.update_all(@key, @stats, :year)
+      db.exists(key).should be_true
+
+      # Test
+      Redistat::Summary.update_all(@key, @stats, :year, { :year => 0 })
+      db.exists(key).should be_false
+    end
+  end
+
 end
